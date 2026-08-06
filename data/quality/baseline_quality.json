@@ -1,0 +1,51 @@
+{
+  "report_name": "baseline",
+  "generated_at": "2026-08-06T04:00:40.521838+00:00",
+  "row_count": 24,
+  "passed": true,
+  "checks": [
+    {
+      "name": "row_count_min",
+      "dimension": "completeness",
+      "passed": true,
+      "details": {
+        "row_count": 24
+      }
+    },
+    {
+      "name": "paper_id_not_null_and_unique",
+      "dimension": "uniqueness",
+      "passed": true,
+      "details": {
+        "null_count": 0,
+        "duplicate_count": 0
+      }
+    },
+    {
+      "name": "title_not_null",
+      "dimension": "completeness",
+      "passed": true,
+      "details": {
+        "null_or_blank_count": 0
+      }
+    },
+    {
+      "name": "summary_min_length",
+      "dimension": "validity",
+      "passed": true,
+      "details": {
+        "threshold_chars": 100,
+        "violating_rows": 0
+      }
+    },
+    {
+      "name": "freshness_age_days",
+      "dimension": "freshness",
+      "passed": true,
+      "details": {
+        "threshold_days": 180,
+        "stale_rows": 0
+      }
+    }
+  ]
+}

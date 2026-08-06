@@ -17,6 +17,13 @@ def _pick_representative_indices(row_count: int, n: int) -> list[int]:
     return sorted({int(i * step) for i in range(n)})
 
 
+def _safe_str(value: Any) -> str:
+    """Guard against NaN (e.g. from a CSV round-trip turning "" into float nan)."""
+    if value is None or (isinstance(value, float) and pd.isna(value)):
+        return ""
+    return str(value)
+
+
 def build_test_set(df: pd.DataFrame, output_path) -> list[dict[str, Any]]:
     """Build a frozen evaluation set from the cleaned dataframe.
 
@@ -37,15 +44,15 @@ def build_test_set(df: pd.DataFrame, output_path) -> list[dict[str, Any]]:
     test_set: list[dict[str, Any]] = []
     counter = 1
     for _, row in rows.iterrows():
-        title = row["title"]
-        paper_id = row["paper_id"]
+        title = _safe_str(row["title"])
+        paper_id = _safe_str(row["paper_id"])
 
         test_set.append(
             {
                 "id": f"q{counter}",
                 "question_type": "summary",
                 "question": f"What is the main summary of the paper titled '{title}'?",
-                "ground_truth": first_sentence(row["summary"]),
+                "ground_truth": first_sentence(_safe_str(row["summary"])),
                 "ground_truth_doc_ids": [paper_id],
             }
         )
@@ -56,7 +63,7 @@ def build_test_set(df: pd.DataFrame, output_path) -> list[dict[str, Any]]:
                 "id": f"q{counter}",
                 "question_type": "authors",
                 "question": f"Who authored the paper titled '{title}'?",
-                "ground_truth": row["authors_joined"],
+                "ground_truth": _safe_str(row["authors_joined"]),
                 "ground_truth_doc_ids": [paper_id],
             }
         )
@@ -67,7 +74,7 @@ def build_test_set(df: pd.DataFrame, output_path) -> list[dict[str, Any]]:
                 "id": f"q{counter}",
                 "question_type": "date",
                 "question": f"When was the paper titled '{title}' published?",
-                "ground_truth": row["published"],
+                "ground_truth": _safe_str(row["published"]),
                 "ground_truth_doc_ids": [paper_id],
             }
         )
@@ -78,7 +85,7 @@ def build_test_set(df: pd.DataFrame, output_path) -> list[dict[str, Any]]:
                 "id": f"q{counter}",
                 "question_type": "categories",
                 "question": f"What categories does the paper titled '{title}' belong to?",
-                "ground_truth": row["categories_joined"],
+                "ground_truth": _safe_str(row["categories_joined"]),
                 "ground_truth_doc_ids": [paper_id],
             }
         )
