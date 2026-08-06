@@ -4,7 +4,7 @@
 
 | Thông tin         | Nội dung                  |
 | ------------------ | -------------------------- |
-| Họ và tên       | C             |
+| Họ và tên       | Nguyễn Hương Trà             |
 | MSSV               | [MSSV]                     |
 | Khóa/Lớp         | K3              |
 | Tên nhóm         | K3-Day10-Data-Pipeline-Observability     |
@@ -24,7 +24,7 @@
 
 | Hoạt động                         | Thành viên/module được hỗ trợ | Kết quả                    |
 | ------------------------------------ | ------------------------------------ | ---------------------------- |
-| Xác nhận cùng D rằng corruption phải đọc `test_set.json` để đảm bảo overlap | D (`corruption_flow.py`) | Đồng thuận: `corrupt_clean_dataframe` tự load test set bên trong thay vì nhận qua tham số, để đảm bảo overlap dù ai gọi hàm |
+| Xác nhận cùng Mai Anh rằng corruption phải đọc `test_set.json` để đảm bảo overlap | Mai Anh (`corruption_flow.py`) | Đồng thuận: `corrupt_clean_dataframe` tự load test set bên trong thay vì nhận qua tham số, để đảm bảo overlap dù ai gọi hàm |
 
 ## 3. Kết quả theo vai trò
 
@@ -33,7 +33,7 @@
 | Implement 6 kịch bản corruption (vượt yêu cầu tối thiểu 3) | `corrupt_clean_dataframe` | `corruption_log.json` ghi rõ từng kịch bản + `affected_paper_ids` | `data/results/corruption_log.json` |
 | Đảm bảo corruption trúng đích vào eval set | `_load_frozen_eval_doc_ids` | 3/3 tài liệu trong `ground_truth_doc_ids` đều bị ít nhất 1 kịch bản tác động | `corruption_log.json.target_doc_ids_from_eval_set` khớp 100% với `test_set.json` |
 
-Output cụ thể: `data/results/corruption_log.json` — log có `random_seed=42` (đảm bảo reproducible), liệt kê 6 scenario với `affected_paper_ids` cụ thể, là bằng chứng trực tiếp cho việc corruption "cố tình" chứ không ngẫu nhiên vô định, và là input để D đối chiếu trong `corruption_report.md`.
+Output cụ thể: `data/results/corruption_log.json` — log có `random_seed=42` (đảm bảo reproducible), liệt kê 6 scenario với `affected_paper_ids` cụ thể, là bằng chứng trực tiếp cho việc corruption "cố tình" chứ không ngẫu nhiên vô định, và là input để Mai Anh đối chiếu trong `corruption_report.md`.
 
 ## 4. Giải thích phần kỹ thuật đã thực hiện
 
@@ -57,7 +57,7 @@ Bài lab cảnh báo rõ: nếu corruption không "đụng trúng" tài liệu n
 | Input                          | `pd.DataFrame` clean (baseline), file `data/eval/test_set.json` (đọc ngầm) |
 | Output                         | `pd.DataFrame` đã corrupt + `data/results/corruption_log.json` |
 | Module phụ thuộc             | `core.config.load_settings`, `core.utils` (read_json, write_json, now_utc) |
-| Module sử dụng output        | `pipelines.corruption_flow` (D) — index lại bằng dataframe này rồi evaluate |
+| Module sử dụng output        | `pipelines.corruption_flow` (Mai Anh) — index lại bằng dataframe này rồi evaluate |
 | Điều kiện lỗi cần xử lý | `test_set.json` chưa tồn tại (fallback `target_ids = set()`, vẫn chọn tài liệu đầu tiên làm mục tiêu blank summary để không bị rỗng hoàn toàn) |
 
 ### Cách xác minh
@@ -81,9 +81,9 @@ print(len(df), '->', len(corrupted))
 ## 5. Một quyết định kỹ thuật quan trọng
 
 - **Bối cảnh:** Chữ ký hàm gốc trong starter code là `corrupt_clean_dataframe(df, output_log_path)` — không có tham số nào cho phép truyền test set hoặc danh sách tài liệu cần nhắm tới.
-- **Các phương án đã cân nhắc:** (1) Thêm tham số `target_doc_ids` vào chữ ký hàm, buộc caller (D) phải tự đọc test set rồi truyền vào; (2) Giữ nguyên chữ ký, để hàm tự đọc `data/eval/test_set.json` bên trong bằng `load_settings()`.
+- **Các phương án đã cân nhắc:** (1) Thêm tham số `target_doc_ids` vào chữ ký hàm, buộc caller (Mai Anh) phải tự đọc test set rồi truyền vào; (2) Giữ nguyên chữ ký, để hàm tự đọc `data/eval/test_set.json` bên trong bằng `load_settings()`.
 - **Phương án đã chọn:** (2) Tự đọc bên trong.
-- **Lý do:** Giữ nguyên contract chữ ký hàm đã được thống nhất ở checkpoint C1 (không phá interface mà D đã dựa vào để viết `corruption_flow.py`), đồng thời đảm bảo overlap là "bất biến" của hàm — không phụ thuộc vào việc caller có nhớ truyền đúng tham số hay không.
+- **Lý do:** Giữ nguyên contract chữ ký hàm đã được thống nhất ở checkpoint C1 (không phá interface mà Mai Anh đã dựa vào để viết `corruption_flow.py`), đồng thời đảm bảo overlap là "bất biến" của hàm — không phụ thuộc vào việc caller có nhớ truyền đúng tham số hay không.
 - **Bằng chứng quyết định phù hợp:** Corruption thực sự trúng đích: cả 3/3 tài liệu trong `ground_truth_doc_ids` đều bị ít nhất 1 kịch bản tác động, dẫn tới `retrieval_hit_rate` giảm rõ rệt (1.00 → 0.67) thay vì giữ nguyên.
 
 ## 6. Một lỗi hoặc blocker đã xử lý
@@ -99,10 +99,10 @@ print(len(df), '->', len(corrupted))
 
 **Câu trả lời:**
 
-1. Dữ liệu sạch (từ A) là input duy nhất của corruption; corruption không bao giờ động vào `data/raw/` — đây chính là điều kiện để repair sau này còn nguồn để quay lại.
+1. Dữ liệu sạch (từ Đạt) là input duy nhất của corruption; corruption không bao giờ động vào `data/raw/` — đây chính là điều kiện để repair sau này còn nguồn để quay lại.
 2. Evaluation set không tự thay đổi qua các trạng thái, nhưng `ground_truth_doc_ids` của nó chính là "bản đồ" để tôi biết nên corrupt tài liệu nào để đo được tác động — nếu không tham chiếu test set, corruption có thể "trớt quớt" hoàn toàn.
 3. Quality checks là phép đo tĩnh trên dataframe (đúng/sai theo ngưỡng); freshness monitoring là một khía cạnh hẹp hơn, chỉ nhìn vào trục thời gian (age_days) — corruption của tôi cố tình tác động cả hai (stale date ảnh hưởng freshness, duplicate/blank ảnh hưởng quality chung).
-4. Test set cố định để đảm bảo corruption của tôi được đánh giá đúng "trước và sau" trên cùng thước đo — nếu D vô tình sinh lại test set mới sau khi tôi đã log corruption theo test set cũ, toàn bộ `target_doc_ids_from_eval_set` sẽ sai lệch.
+4. Test set cố định để đảm bảo corruption của tôi được đánh giá đúng "trước và sau" trên cùng thước đo — nếu Mai Anh vô tình sinh lại test set mới sau khi tôi đã log corruption theo test set cũ, toàn bộ `target_doc_ids_from_eval_set` sẽ sai lệch.
 5. Repair thành công dựa trên: (a) `repaired_metrics.json` phục hồi gần bằng baseline, (b) `repaired_quality.json`/`repaired_freshness.json` PASS, và quan trọng nhất — (c) repair phải xuất phát từ `data/raw/crossref_records.json` (raw snapshot), không phải từ việc "vá tay" trực tiếp lên `papers_clean_corrupted.csv`.
 
 ## 8. Phân tích kết quả
@@ -146,5 +146,5 @@ Thêm kịch bản corruption "encoding lỗi" (vd. mojibake trên summary có k
 - [x] Báo cáo không chứa `.env`, API key, token hoặc secret.
 - [x] Báo cáo này không phải bản sao nguyên văn của báo cáo nhóm hoặc báo cáo thành viên khác.
 
-**Họ và tên:** C
+**Họ và tên:** Nguyễn Hương Trà
 **Ngày xác nhận:** 2026-08-06

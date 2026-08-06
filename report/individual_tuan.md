@@ -4,7 +4,7 @@
 
 | Thông tin         | Nội dung                  |
 | ------------------ | -------------------------- |
-| Họ và tên       | B             |
+| Họ và tên       | Hà Anh Tuấn             |
 | MSSV               | [MSSV]                     |
 | Khóa/Lớp         | K3              |
 | Tên nhóm         | K3-Day10-Data-Pipeline-Observability     |
@@ -26,7 +26,7 @@
 
 | Hoạt động                         | Thành viên/module được hỗ trợ | Kết quả                    |
 | ------------------------------------ | ------------------------------------ | ---------------------------- |
-| Mở rộng chữ ký `generate_corruption_report` để nhận thêm `baseline_quality`/`baseline_freshness` | D (`corruption_flow.py`) | Bảng so sánh 3 cột (Baseline/Corrupted/Repaired) đầy đủ cho cả quality lẫn freshness thay vì chỉ 2 cột như signature gốc |
+| Mở rộng chữ ký `generate_corruption_report` để nhận thêm `baseline_quality`/`baseline_freshness` | Mai Anh (`corruption_flow.py`) | Bảng so sánh 3 cột (Baseline/Corrupted/Repaired) đầy đủ cho cả quality lẫn freshness thay vì chỉ 2 cột như signature gốc |
 
 ## 3. Kết quả theo vai trò
 
@@ -58,7 +58,7 @@ Cần một cơ chế phát hiện sự cố dữ liệu độc lập với kế
 | Input                          | `pd.DataFrame` (clean/corrupted/repaired), `Settings.freshness_threshold_days` |
 | Output                         | `dict` quality/freshness ghi JSON; file `.md` report |
 | Module phụ thuộc             | `core.utils` (now_utc, write_json, write_text) |
-| Module sử dụng output        | `pipelines.phase1`, `pipelines.corruption_flow` (D); `group_report.md` (toàn nhóm) |
+| Module sử dụng output        | `pipelines.phase1`, `pipelines.corruption_flow` (Mai Anh); `group_report.md` (toàn nhóm) |
 | Điều kiện lỗi cần xử lý | Dataframe rỗng (trả về payload mặc định `is_fresh=false`, `total_rows=0` thay vì crash) |
 
 ### Cách xác minh
@@ -122,7 +122,7 @@ print(q['passed'], f['is_fresh'])
 
 ### Kết luận từ số liệu
 
-1. **Corruption → quality/freshness FAIL → answer metric giảm:** `corrupted_quality.json` liệt kê rõ 3 check FAIL (`paper_id_not_null_and_unique`, `summary_min_length`, `freshness_age_days`); đây chính xác là 3 trong 6 kịch bản corruption của C (duplicate rows, blank summary, stale date) — mỗi FAIL tương ứng 1-1 với 1 kịch bản, không phải suy đoán.
+1. **Corruption → quality/freshness FAIL → answer metric giảm:** `corrupted_quality.json` liệt kê rõ 3 check FAIL (`paper_id_not_null_and_unique`, `summary_min_length`, `freshness_age_days`); đây chính xác là 3 trong 6 kịch bản corruption của Trà (duplicate rows, blank summary, stale date) — mỗi FAIL tương ứng 1-1 với 1 kịch bản, không phải suy đoán.
 2. **Repair → quality/freshness PASS trở lại → answer metric phục hồi:** `repaired_quality.json`/`repaired_freshness.json` đều PASS, đồng thời `repaired_metrics.json` khớp lại baseline — chứng minh quality/freshness signal là chỉ báo sớm đáng tin cậy cho chất lượng RAG cuối cùng.
 
 Corruption ảnh hưởng rõ nhất đến observability signal: **duplicate_rows**, vì đây là check duy nhất chuyển từ PASS baseline sang FAIL mà không cần đến bất kỳ ngưỡng số nào (chỉ cần > 0 duplicate là FAIL ngay), khiến nó là tín hiệu "nhạy" nhất trong 5 check.
@@ -148,5 +148,5 @@ Tích hợp Great Expectations (đã có sẵn trong `pyproject.toml` nhưng ch�
 - [x] Báo cáo không chứa `.env`, API key, token hoặc secret.
 - [x] Báo cáo này không phải bản sao nguyên văn của báo cáo nhóm hoặc báo cáo thành viên khác.
 
-**Họ và tên:** B
+**Họ và tên:** Hà Anh Tuấn
 **Ngày xác nhận:** 2026-08-06

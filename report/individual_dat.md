@@ -4,7 +4,7 @@
 
 | Thông tin         | Nội dung                  |
 | ------------------ | -------------------------- |
-| Họ và tên       | Nguyễn Văn A             |
+| Họ và tên       | Nguyễn Minh Đạt             |
 | MSSV               | [MSSV]                     |
 | Khóa/Lớp         | K3              |
 | Tên nhóm         | K3-Day10-Data-Pipeline-Observability     |
@@ -25,7 +25,7 @@
 
 | Hoạt động                         | Thành viên/module được hỗ trợ | Kết quả                    |
 | ------------------------------------ | ------------------------------------ | ---------------------------- |
-| Debug lỗi NaN trong ground_truth khi tích hợp | D (`phase1.py`) | Xác định nguyên nhân là CSV round-trip biến `""` thành NaN, phối hợp với Mạnh để thêm fallback category |
+| Debug lỗi NaN trong ground_truth khi tích hợp | Mai Anh (`phase1.py`) | Xác định nguyên nhân là CSV round-trip biến `""` thành NaN, phối hợp với Mạnh để thêm fallback category |
 
 ## 3. Kết quả theo vai trò
 
@@ -91,7 +91,7 @@ build_test_set(df, s.paths.eval_testset)
 
 ## 6. Một lỗi hoặc blocker đã xử lý
 
-- **Triệu chứng/lỗi nguyên văn:** `TypeError: expected string or bytes-like object, got 'float'` tại `_token_f1` khi D chạy `evaluate_pipeline` lần đầu.
+- **Triệu chứng/lỗi nguyên văn:** `TypeError: expected string or bytes-like object, got 'float'` tại `_token_f1` khi Mai Anh chạy `evaluate_pipeline` lần đầu.
 - **Lệnh hoặc bước tái hiện:** `df = pd.read_csv(settings.paths.clean_csv)` rồi `build_test_set(df, ...)` — câu hỏi loại "categories" có `ground_truth = nan`.
 - **Nguyên nhân gốc:** `categories_joined` là chuỗi rỗng `""` ở nguồn (Crossref `subject` không có), và `pd.read_csv` mặc định parse ô rỗng thành `NaN` (kiểu float) thay vì chuỗi rỗng.
 - **Cách xử lý:** Thêm hàm `_safe_str()` trong `testset.py` (chuyển NaN/None thành `""` trước khi dùng), đồng thời phối hợp với Mạnh để `categories_joined` không bao giờ rỗng ngay từ ingestion (fallback `type`), giảm khả năng NaN xuất hiện ở bất kỳ đường đọc dữ liệu nào (CSV hay JSON).
@@ -149,5 +149,5 @@ Thêm câu hỏi loại "multi-hop" (so sánh giữa 2 tài liệu) để kiểm
 - [x] Báo cáo không chứa `.env`, API key, token hoặc secret.
 - [x] Báo cáo này không phải bản sao nguyên văn của báo cáo nhóm hoặc báo cáo thành viên khác.
 
-**Họ và tên:** Nguyễn Văn A
+**Họ và tên:** Nguyễn Minh Đạt
 **Ngày xác nhận:** 2026-08-06

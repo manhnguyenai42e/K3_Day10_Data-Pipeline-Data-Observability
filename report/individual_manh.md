@@ -26,7 +26,7 @@
 
 | Hoạt động                         | Thành viên/module được hỗ trợ | Kết quả                    |
 | ------------------------------------ | ------------------------------------ | ---------------------------- |
-| Bổ sung fallback category từ Crossref `type` khi `subject` rỗng | A (`testset.py`), D (`phase1.py`) | Sửa lỗi eval set có ground_truth rỗng/NaN cho loại câu hỏi "categories" |
+| Bổ sung fallback category từ Crossref `type` khi `subject` rỗng | Đạt (`testset.py`), Mai Anh (`phase1.py`) | Sửa lỗi eval set có ground_truth rỗng/NaN cho loại câu hỏi "categories" |
 
 ## 3. Kết quả theo vai trò
 
@@ -35,7 +35,7 @@
 | Gọi Crossref API với retry 429/503, backoff nhân đôi (2s→32s, tối đa 5 lần) | `fetch_source_records` | 24 bản ghi thô, không mất request nào phải retry ở lần chạy thực tế | `data/raw/crossref_response.json` (raw HTTP), `data/raw/crossref_records.json` (24 `PaperRecord`) |
 | Parse payload thành `PaperRecord`, lọc record thiếu title/abstract | `parse_crossref_payload` | 24/24 record hợp lệ được giữ lại (query đã có `has-abstract:true`) | So khớp `message.items` trong raw response với `crossref_records.json` |
 
-Output cụ thể: `data/raw/crossref_records.json` — 24 `PaperRecord` phẳng (paper_id, title, summary có tag HTML/XML còn nguyên, authors, categories, published, updated, abs_url, pdf_url, comment) — là input trực tiếp cho `cleaning.py` của A và là raw snapshot dùng để repair ở checkpoint C4.
+Output cụ thể: `data/raw/crossref_records.json` — 24 `PaperRecord` phẳng (paper_id, title, summary có tag HTML/XML còn nguyên, authors, categories, published, updated, abs_url, pdf_url, comment) — là input trực tiếp cho `cleaning.py` của Đạt và là raw snapshot dùng để repair ở checkpoint C4.
 
 ## 4. Giải thích phần kỹ thuật đã thực hiện
 
@@ -58,7 +58,7 @@ Crossref trả về JSON lồng nhau (author là list dict given/family, publish
 | Input                          | `Settings` (source_query, source_filter, max_results) từ `core.config.load_settings()` |
 | Output                         | `list[PaperRecord]`, ghi ra `data/raw/crossref_response.json` + `crossref_records.json` |
 | Module phụ thuộc             | `core.config`, `core.utils` (normalize_whitespace, read_json, write_json) |
-| Module sử dụng output        | `ingestion.cleaning.build_clean_dataframe` (A), `pipelines.phase1`/`corruption_flow` (D) khi cần repair |
+| Module sử dụng output        | `ingestion.cleaning.build_clean_dataframe` (Đạt), `pipelines.phase1`/`corruption_flow` (Mai Anh) khi cần repair |
 | Điều kiện lỗi cần xử lý | HTTP 429/503 (retry), record thiếu DOI/title/abstract (bỏ qua), DOI trùng lặp (dedupe bằng `seen_ids`) |
 
 ### Cách xác minh
@@ -81,7 +81,7 @@ uv run python -c "from core.config import load_settings; from ingestion.crossref
 
 ## 6. Một lỗi hoặc blocker đã xử lý
 
-- **Triệu chứng/lỗi nguyên văn:** `TypeError: expected string or bytes-like object, got 'float'` khi chạy `evaluate_pipeline` (xảy ra ở bước tích hợp của D, nhưng nguyên nhân gốc nằm ở dữ liệu ingestion/cleaning).
+- **Triệu chứng/lỗi nguyên văn:** `TypeError: expected string or bytes-like object, got 'float'` khi chạy `evaluate_pipeline` (xảy ra ở bước tích hợp của Mai Anh, nhưng nguyên nhân gốc nằm ở dữ liệu ingestion/cleaning).
 - **Lệnh hoặc bước tái hiện:** Đọc `papers_clean.csv` bằng `pd.read_csv` rồi gọi `build_test_set` trên dataframe đó.
 - **Nguyên nhân gốc:** `categories_joined` rỗng (do Crossref `subject` không có) bị pandas biến thành `NaN` (float) khi round-trip qua CSV, kết hợp với việc `categories` chưa có fallback.
 - **Cách xử lý:** Thêm fallback `type` → `categories` trong `parse_crossref_payload` (mô tả ở mục 5) để giá trị không bao giờ rỗng ngay từ ingestion, giảm khả năng gặp lại vấn đề NaN dù dữ liệu có đi qua CSV hay không.

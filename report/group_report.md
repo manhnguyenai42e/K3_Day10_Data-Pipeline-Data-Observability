@@ -14,10 +14,10 @@
 | STT | Họ và tên | MSSV | Vai trò chính | Module/deliverable sở hữu |
 | --: | --- | --- | --- | --- |
 | 1 | Nguyễn Hùng Mạnh | [MSSV] | Source Ingestion Owner | `src/ingestion/crossref.py` |
-| 2 | Nguyễn Văn A | [MSSV] | Data Model & Eval Set Owner | `src/ingestion/cleaning.py`, `src/evaluation/testset.py` |
-| 3 | B | [MSSV] | Data Observability Owner | `src/observability/quality.py`, `src/observability/reporting.py` |
-| 4 | C | [MSSV] | Corruption & Repair Owner | `src/ingestion/corruption.py` |
-| 5 | D | [MSSV] | Integration & Comparison Owner | `src/pipelines/phase1.py`, `src/pipelines/corruption_flow.py` |
+| 2 | Nguyễn Minh Đạt | [MSSV] | Data Model & Eval Set Owner | `src/ingestion/cleaning.py`, `src/evaluation/testset.py` |
+| 3 | Hà Anh Tuấn | [MSSV] | Data Observability Owner | `src/observability/quality.py`, `src/observability/reporting.py` |
+| 4 | Nguyễn Hương Trà | [MSSV] | Corruption & Repair Owner | `src/ingestion/corruption.py` |
+| 5 | Nguyễn Thị Mai Anh | [MSSV] | Integration & Comparison Owner | `src/pipelines/phase1.py`, `src/pipelines/corruption_flow.py` |
 
 ## 2. Tóm tắt kết quả
 
@@ -54,13 +54,13 @@ Crossref API
 | Khối             | Input          | Xử lý chính             | Output/artifact          | Owner          |
 | ----------------- | -------------- | -------------------------- | ------------------------ | -------------- |
 | Ingestion         | Crossref REST API (`/works`) | Query + retry 429/503, parse payload thành `PaperRecord` | `data/raw/crossref_response.json`, `data/raw/crossref_records.json` | Nguyễn Hùng Mạnh |
-| Cleaning          | `crossref_records.json` | Strip XML/HTML, join authors/categories, tính `age_days`, tạo `text_for_embedding`, lọc bản ghi xấu | `data/clean/papers_clean.csv`, `papers_clean.json` | Nguyễn Văn A |
-| Eval set          | `papers_clean.json` | Sinh câu hỏi factual (summary/authors/date/categories) bám ground truth | `data/eval/test_set.json` | Nguyễn Văn A |
+| Cleaning          | `crossref_records.json` | Strip XML/HTML, join authors/categories, tính `age_days`, tạo `text_for_embedding`, lọc bản ghi xấu | `data/clean/papers_clean.csv`, `papers_clean.json` | Nguyễn Minh Đạt |
+| Eval set          | `papers_clean.json` | Sinh câu hỏi factual (summary/authors/date/categories) bám ground truth | `data/eval/test_set.json` | Nguyễn Minh Đạt |
 | Embedding/index   | `papers_clean.json` | MiniLM embedding + ChromaDB collection (đã có sẵn trong starter) | `data/embeddings/*.json`, `data/chroma/` | (dùng chung, không cần sửa) |
-| Evaluation        | `test_set.json` + index | Trả lời câu hỏi, tính `retrieval_hit_rate`, `mean_token_f1`, LLM judge (Gemini) | `data/results/*_metrics.json`, `*_answers.json` | D gọi `evaluation/metrics.py` trong pipeline |
-| Observability     | `papers_clean.json` (mỗi trạng thái) | Completeness/uniqueness/validity checks + freshness report | `data/quality/*_quality.json`, `*_freshness.json` | B |
-| Corruption/repair | `papers_clean.csv` + `test_set.json` | Corrupt có kiểm soát (trúng doc trong eval set) + repair từ raw snapshot | `data/clean/papers_clean_corrupted.csv`, `data/results/corruption_log.json` | C |
-| Orchestration     | Toàn bộ module trên | Ghép baseline pipeline (`phase1.py`) và corruption/repair/compare flow (`corruption_flow.py`) | `data/reports/phase1_report.md`, `data/reports/corruption_report.md` | D |
+| Evaluation        | `test_set.json` + index | Trả lời câu hỏi, tính `retrieval_hit_rate`, `mean_token_f1`, LLM judge (Gemini) | `data/results/*_metrics.json`, `*_answers.json` | Nguyễn Thị Mai Anh gọi `evaluation/metrics.py` trong pipeline |
+| Observability     | `papers_clean.json` (mỗi trạng thái) | Completeness/uniqueness/validity checks + freshness report | `data/quality/*_quality.json`, `*_freshness.json` | Hà Anh Tuấn |
+| Corruption/repair | `papers_clean.csv` + `test_set.json` | Corrupt có kiểm soát (trúng doc trong eval set) + repair từ raw snapshot | `data/clean/papers_clean_corrupted.csv`, `data/results/corruption_log.json` | Nguyễn Hương Trà |
+| Orchestration     | Toàn bộ module trên | Ghép baseline pipeline (`phase1.py`) và corruption/repair/compare flow (`corruption_flow.py`) | `data/reports/phase1_report.md`, `data/reports/corruption_report.md` | Nguyễn Thị Mai Anh |
 
 ## 4. Cách tái hiện kết quả
 

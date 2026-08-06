@@ -4,7 +4,7 @@
 
 | Thông tin         | Nội dung                  |
 | ------------------ | -------------------------- |
-| Họ và tên       | D             |
+| Họ và tên       | Nguyễn Thị Mai Anh             |
 | MSSV               | [MSSV]                     |
 | Khóa/Lớp         | K3              |
 | Tên nhóm         | K3-Day10-Data-Pipeline-Observability     |
@@ -18,15 +18,15 @@
 
 | Module/deliverable | File/hàm phụ trách | Input nhận vào | Output bàn giao  | Trạng thái                                 |
 | ------------------ | --------------------- | ---------------- | ----------------- | -------------------------------------------- |
-| Baseline pipeline | `src/pipelines/phase1.py::main` | Toàn bộ module của Mạnh/A/B | `data/results/baseline_*`, `data/reports/phase1_report.md` | Hoàn thành |
-| Corruption/repair flow | `src/pipelines/corruption_flow.py::main` | Module của C + baseline artifacts | `data/results/corrupted_*`, `repaired_*`, `data/reports/corruption_report.md` | Hoàn thành |
+| Baseline pipeline | `src/pipelines/phase1.py::main` | Toàn bộ module của Mạnh/Đạt/Tuấn | `data/results/baseline_*`, `data/reports/phase1_report.md` | Hoàn thành |
+| Corruption/repair flow | `src/pipelines/corruption_flow.py::main` | Module của Trà + baseline artifacts | `data/results/corrupted_*`, `repaired_*`, `data/reports/corruption_report.md` | Hoàn thành |
 
 ### Việc hỗ trợ ngoài phạm vi chính
 
 | Hoạt động                         | Thành viên/module được hỗ trợ | Kết quả                    |
 | ------------------------------------ | ------------------------------------ | ---------------------------- |
-| Phát hiện và báo lỗi NaN trong ground_truth khi chạy tích hợp lần đầu | A (`testset.py`), Mạnh (`crossref.py`) | Xác định root cause, phối hợp sửa fallback category + `_safe_str()` |
-| Đề xuất mở rộng signature `generate_corruption_report` | B (`reporting.py`) | Có đủ baseline_quality/baseline_freshness để làm bảng so sánh 3 cột đúng yêu cầu C4 |
+| Phát hiện và báo lỗi NaN trong ground_truth khi chạy tích hợp lần đầu | Đạt (`testset.py`), Mạnh (`crossref.py`) | Xác định root cause, phối hợp sửa fallback category + `_safe_str()` |
+| Đề xuất mở rộng signature `generate_corruption_report` | Tuấn (`reporting.py`) | Có đủ baseline_quality/baseline_freshness để làm bảng so sánh 3 cột đúng yêu cầu C4 |
 
 ## 3. Kết quả theo vai trò
 
@@ -35,7 +35,7 @@
 | Ghép ingest → clean → index → eval → quality → report thành 1 lệnh chạy | `phase1.py::main`, `script/run_phase1.py` | `retrieval_hit_rate=1.00`, quality PASS, freshness fresh | `data/reports/phase1_report.md` |
 | Ghép corrupt → evaluate → repair (từ raw) → evaluate → compare | `corruption_flow.py::main`, `script/run_corruption_flow.py` | Baseline→Corrupted→Repaired: 1.00→0.67→1.00 | `data/reports/corruption_report.md` |
 
-Output cụ thể: `data/reports/corruption_report.md` là sản phẩm tích hợp cuối cùng, tổng hợp output của cả 4 thành viên khác (raw/clean của Mạnh-A, quality/freshness/report của B, corruption log của C) thành một bằng chứng duy nhất chứng minh chuỗi nhân quả Corruption → Quality signal → Answer impact → Repair recovery.
+Output cụ thể: `data/reports/corruption_report.md` là sản phẩm tích hợp cuối cùng, tổng hợp output của cả 4 thành viên khác (raw/clean của Mạnh-Đạt, quality/freshness/report của Tuấn, corruption log của Trà) thành một bằng chứng duy nhất chứng minh chuỗi nhân quả Corruption → Quality signal → Answer impact → Repair recovery.
 
 ## 4. Giải thích phần kỹ thuật đã thực hiện
 
@@ -55,7 +55,7 @@ Output cụ thể: `data/reports/corruption_report.md` là sản phẩm tích h�
 
 | Thành phần                   | Mô tả                                     |
 | ------------------------------ | ------------------------------------------- |
-| Input                          | Toàn bộ output của Mạnh (raw), A (clean+testset), B (quality+reporting), C (corruption) |
+| Input                          | Toàn bộ output của Mạnh (raw), Đạt (clean+testset), Tuấn (quality+reporting), Trà (corruption) |
 | Output                         | `data/results/*_metrics.json`, `*_answers.json`, `data/reports/phase1_report.md`, `corruption_report.md` |
 | Module phụ thuộc             | Tất cả module trong `src/` (trừ `retrieval/` dùng nguyên bản từ starter) |
 | Module sử dụng output        | `group_report.md` (số liệu tổng hợp), tổ chấm bài |
@@ -85,7 +85,7 @@ uv run python script/run_corruption_flow.py
 - **Triệu chứng/lỗi nguyên văn:** Lần chạy `script/run_phase1.py` đầu tiên báo `TypeError: expected string or bytes-like object, got 'float'` tại `_token_f1` trong `evaluation/metrics.py`, dừng pipeline giữa chừng (sau khi đã gọi Gemini judge 4 lần).
 - **Lệnh hoặc bước tái hiện:** `uv run python script/run_phase1.py` (khi `data/eval/test_set.json` đã được sinh trước đó từ một dataframe đọc qua `pd.read_csv`).
 - **Nguyên nhân gốc:** `test_set.json` đã đóng băng từ trước chứa 1 giá trị `ground_truth = NaN` (câu hỏi "categories" của 1 tài liệu có `categories_joined` rỗng, bị pandas CSV round-trip biến thành float NaN).
-- **Cách xử lý:** Không sửa trong `phase1.py` (vì lỗi không nằm ở tầng integration) — phối hợp với A vá `testset.py` (`_safe_str()`) và với Mạnh vá `crossref.py` (fallback category từ `type`), sau đó xóa và tái sinh lại `test_set.json` từ dataframe in-memory (không qua CSV) trước khi chạy lại pipeline.
+- **Cách xử lý:** Không sửa trong `phase1.py` (vì lỗi không nằm ở tầng integration) — phối hợp với Đạt vá `testset.py` (`_safe_str()`) và với Mạnh vá `crossref.py` (fallback category từ `type`), sau đó xóa và tái sinh lại `test_set.json` từ dataframe in-memory (không qua CSV) trước khi chạy lại pipeline.
 - **Cách xác minh sau khi sửa:** `script/run_phase1.py` chạy hết toàn bộ 12 câu hỏi, in ra dòng tóm tắt cuối cùng không còn traceback.
 - **Điều học được:** Với vai trò integration, việc "chạy thử sớm và thường xuyên" (chạy pipeline ngay khi từng module vừa xong, thay vì đợi tất cả xong mới ghép) giúp phát hiện lỗi tương tác giữa các module (ở đây là CSV round-trip) sớm hơn nhiều so với chỉ test từng module riêng lẻ.
 
@@ -93,7 +93,7 @@ uv run python script/run_corruption_flow.py
 
 **Câu trả lời:**
 
-1. Crossref API → raw response/records (Mạnh) → clean dataframe (A) → `LocalEmbeddingIndex.build` encode `text_for_embedding` bằng MiniLM và nạp vào ChromaDB collection tương ứng — toàn bộ chuỗi này được `phase1.py` gọi tuần tự trong 1 lần `main()`.
+1. Crossref API → raw response/records (Mạnh) → clean dataframe (Đạt) → `LocalEmbeddingIndex.build` encode `text_for_embedding` bằng MiniLM và nạp vào ChromaDB collection tương ứng — toàn bộ chuỗi này được `phase1.py` gọi tuần tự trong 1 lần `main()`.
 2. `test_set.json` chứa `ground_truth_doc_ids`; `evaluation.metrics.evaluate_pipeline` gọi `retrieval.qa.answer_question` cho từng câu, so `retrieved_doc_ids` với `ground_truth_doc_ids` để tính hit rate, và so `answer` với `ground_truth` bằng token F1 + Gemini judge.
 3. Quality checks (uniqueness/completeness/validity) là điều kiện tĩnh trên dataframe tại 1 thời điểm; freshness monitoring là một tín hiệu con tách riêng (dựa hoàn toàn vào `age_days`) nhưng được đo cùng lúc với quality trong cả `phase1.py` lẫn `corruption_flow.py` để không bỏ sót trạng thái nào.
 4. Test set phải cố định vì `corruption_flow.py` so sánh corrupted/repaired với **cùng** `baseline_metrics.json` đã lưu từ `phase1.py` — nếu câu hỏi khác nhau giữa 2 lần chạy, phép trừ "Corruption Δ"/"Repair Δ" trong report sẽ vô nghĩa.
@@ -140,5 +140,5 @@ Thêm một chế độ `--dry-run` cho cả 2 script để in ra checklist các
 - [x] Báo cáo không chứa `.env`, API key, token hoặc secret.
 - [x] Báo cáo này không phải bản sao nguyên văn của báo cáo nhóm hoặc báo cáo thành viên khác.
 
-**Họ và tên:** D
+**Họ và tên:** Nguyễn Thị Mai Anh
 **Ngày xác nhận:** 2026-08-06
