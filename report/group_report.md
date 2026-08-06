@@ -6,20 +6,20 @@
 
 | Thông tin         | Nội dung                  |
 | ------------------ | -------------------------- |
-| Khóa/Lớp         | [K3 hoặc K4]              |
-| Tên nhóm         | [Tên hoặc mã nhóm]     |
-| Repository         | [Đường dẫn repository] |
-| Ngày hoàn thành | [YYYY-MM-DD]               |
+| Khóa/Lớp         | K3              |
+| Tên nhóm         | K3-Day10-Data-Pipeline-Observability     |
+| Repository         | https://github.com/nhmanhDev/K3_Day10_Data-Pipeline-Data-Observability |
+| Ngày hoàn thành | 2026-08-06               |
 
 ### Thành viên và phân công
 
 | STT | Họ và tên | MSSV | Vai trò chính | Module/deliverable sở hữu |
 | --: | --- | --- | --- | --- |
-| 1 | [Họ tên] | [MSSV] | [Vai trò] | [File, hàm hoặc artifact] |
-| 2 | [Họ tên] | [MSSV] | [Vai trò] | [File, hàm hoặc artifact] |
-| 3 | [Họ tên] | [MSSV] | [Vai trò] | [File, hàm hoặc artifact] |
-| 4 | [Nếu có] | [MSSV] | [Vai trò] | [File, hàm hoặc artifact] |
-| 5 | [Nếu có] | [MSSV] | [Vai trò] | [File, hàm hoặc artifact] |
+| 1 | Nguyễn Hùng Mạnh | [MSSV] | Source Ingestion Owner | `src/ingestion/crossref.py` |
+| 2 | Nguyễn Văn A | [MSSV] | Data Model & Eval Set Owner | `src/ingestion/cleaning.py`, `src/evaluation/testset.py` |
+| 3 | B | [MSSV] | Data Observability Owner | `src/observability/quality.py`, `src/observability/reporting.py` |
+| 4 | C | [MSSV] | Corruption & Repair Owner | `src/ingestion/corruption.py` |
+| 5 | D | [MSSV] | Integration & Comparison Owner | `src/pipelines/phase1.py`, `src/pipelines/corruption_flow.py` |
 
 ## 2. Tóm tắt kết quả
 
@@ -58,13 +58,14 @@ Crossref API
 
 | Khối             | Input          | Xử lý chính             | Output/artifact          | Owner          |
 | ----------------- | -------------- | -------------------------- | ------------------------ | -------------- |
-| Ingestion         | [Nguồn/input] | [Fetch, retry, parse...]   | [Đường dẫn artifact] | [Thành viên] |
-| Cleaning          | [Input]        | [Các quy tắc chính]     | [Đường dẫn artifact] | [Thành viên] |
-| Embedding/index   | [Input]        | [Model/index config]       | [Đường dẫn artifact] | [Thành viên] |
-| Evaluation        | [Input]        | [Test set và metrics]     | [Đường dẫn artifact] | [Thành viên] |
-| Observability     | [Input]        | [Quality/freshness checks] | [Đường dẫn artifact] | [Thành viên] |
-| Corruption/repair | [Input]        | [Corruption và repair]    | [Đường dẫn artifact] | [Thành viên] |
-| Orchestration     | [Input]        | [Thứ tự chạy]           | [Reports/metrics]        | [Thành viên] |
+| Ingestion         | Crossref REST API (`/works`) | Query + retry 429/503, parse payload thành `PaperRecord` | `data/raw/crossref_response.json`, `data/raw/crossref_records.json` | Nguyễn Hùng Mạnh |
+| Cleaning          | `crossref_records.json`        | Strip XML/HTML, join authors/categories, tính `age_days`, tạo `text_for_embedding`, lọc bản ghi xấu | `data/clean/papers_clean.csv`, `papers_clean.json` | Nguyễn Văn A |
+| Eval set          | `papers_clean.json`        | Sinh câu hỏi factual (summary/authors/date/categories) bám ground truth       | `data/eval/test_set.json` | Nguyễn Văn A |
+| Embedding/index   | `papers_clean.json`        | MiniLM embedding + ChromaDB collection (đã có sẵn trong starter)       | `data/embeddings/*.json`, `data/chroma/` | (dùng chung, không cần sửa) |
+| Evaluation        | `test_set.json` + index        | Agent trả lời, tính `retrieval_hit_rate`, `mean_token_f1`, LLM judge     | `data/results/*_metrics.json`, `*_answers.json` | Integration (D) gọi `evaluation/metrics.py` |
+| Observability     | `papers_clean.json` (mỗi trạng thái)        | Completeness/uniqueness/validity checks + freshness report | `data/quality/*_quality.json`, `*_freshness.json` | B |
+| Corruption/repair | `papers_clean.csv` + `test_set.json`        | Corrupt có kiểm soát (trúng doc trong eval set) + repair từ raw snapshot    | `data/clean/papers_clean_corrupted.csv`, `data/results/corruption_log.json` | C |
+| Orchestration     | Toàn bộ module trên        | Ghép baseline pipeline (`phase1.py`) và corruption/repair/compare flow (`corruption_flow.py`)           | `data/reports/phase1_report.md`, `data/reports/corruption_report.md` | D |
 
 ## 4. Cách tái hiện kết quả
 

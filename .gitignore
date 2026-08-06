@@ -5,3 +5,7 @@ lab.txt
 src/*.egg-info/
 lab/
 **/__pycache__/
+
+# Chroma vector store is a large regenerable binary DB; keep the folder, not its contents.
+data/chroma/*
+!data/chroma/.gitkeep
